@@ -1,5 +1,4 @@
 import os
-import time
 import pickle
 from argparse import ArgumentParser
 
@@ -42,7 +41,7 @@ class BlockChainDataset(Dataset):
 class Backbone(torch.nn.Module):
     def __init__(self):
         super().__init__()
-        self.fc1 = nn.Linear(2, 128) # if the selected dataset is HFBTP, then modify to 3, 128, because it has 3 input features in HFBTP
+        self.fc1 = nn.Linear(2, 128)
         self.fc2 = nn.Linear(128, 64)
         self.fc3 = nn.Linear(64, 8)
         self.relu = nn.ReLU()
@@ -153,7 +152,7 @@ def cli_main():
             Y1 = raw_data[:, 4].reshape((-1, 1))
         else:
             Y1 = raw_data[:, 3].reshape((-1, 1))
-    elif args.dataset == "MMBPD_Distributed" or "MMBPD_Collective":
+    elif args.dataset == "MMBPD":
         X = raw_data[:, 1:3]
         if args.task == "Latency":
             Y1 = raw_data[:, 4].reshape((-1, 1))
@@ -182,22 +181,22 @@ def cli_main():
         val_loader = DataLoader(val_dataset, batch_size=Ytest1.shape[0], shuffle=False, pin_memory=True, num_workers=23, persistent_workers=True)
         test_loader = DataLoader(test_dataset, batch_size=Xtest1.shape[0], shuffle=False, pin_memory=True, num_workers=23, persistent_workers=True)
 
-        GradientBoosting = GradientBoostingRegressor()
+        GradientBoosting = GradientBoostingRegressor(n_estimators=500, random_state=42)
         GradientBoosting.fit(Xtrain1_minmax, Ytrain1)
         with open(os.path.join('Models', str(args.dataset), str(args.task), 'GBR' + str(i) + '.pkl'), 'wb') as file:
             pickle.dump(GradientBoosting, file)
 
-        LightGBM = lgb.LGBMRegressor(objective='regression', num_leaves=31, learning_rate=0.1, n_estimators=500)
+        LightGBM = lgb.LGBMRegressor(objective='regression', num_leaves=31, n_estimators=500, random_state=42)
         LightGBM.fit(Xtrain1_minmax, Ytrain1)
         with open(os.path.join('Models', str(args.dataset), str(args.task), 'LightGBM' + str(i) + '.pkl'), 'wb') as file:
             pickle.dump(LightGBM, file)
 
-        RandomForest = RandomForestRegressor(n_estimators=500)
+        RandomForest = RandomForestRegressor(n_estimators=500, random_state=42)
         RandomForest.fit(Xtrain1_minmax, Ytrain1)
         with open(os.path.join('Models', str(args.dataset), str(args.task), 'RFR' + str(i) + '.pkl'), 'wb') as file:
             pickle.dump(RandomForest, file)
 
-        ExtraTrees = ExtraTreesRegressor(n_estimators=500)
+        ExtraTrees = ExtraTreesRegressor(n_estimators=500, random_state=42)
         ExtraTrees.fit(Xtrain1_minmax, Ytrain1)
         with open(os.path.join('Models', str(args.dataset), str(args.task), 'ETR' + str(i) + '.pkl'), 'wb') as file:
             pickle.dump(ExtraTrees, file)
