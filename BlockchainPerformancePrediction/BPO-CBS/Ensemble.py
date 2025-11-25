@@ -186,7 +186,6 @@ def cli_main():
         with open(os.path.join('Models', str(args.dataset), str(args.task), 'GBR' + str(i) + '.pkl'), 'wb') as file:
             pickle.dump(GradientBoosting, file)
 
-        # LightGBM = lgb.LGBMRegressor(objective='regression', num_leaves=31, learning_rate=0.1, n_estimators=500)
         LightGBM = lgb.LGBMRegressor(objective='regression', num_leaves=31, n_estimators=500, random_state=42)
         LightGBM.fit(Xtrain1_minmax, Ytrain1)
         with open(os.path.join('Models', str(args.dataset), str(args.task), 'LightGBM' + str(i) + '.pkl'), 'wb') as file:
@@ -211,7 +210,7 @@ def cli_main():
         early_stop_callback = EarlyStopping(monitor="val_MAE", min_delta=0.000, patience=10, verbose=True, mode="min")
         # ------------
         # training
-        # ------------10000-500
+        # ------------
         trainer = pl.Trainer(max_epochs=200, check_val_every_n_epoch=10,
                              callbacks=[early_stop_callback], accelerator="gpu")
         trainer.fit(model, train_loader, val_loader)
@@ -241,3 +240,4 @@ def cli_main():
 
 if __name__ == '__main__':
     cli_main()
+
