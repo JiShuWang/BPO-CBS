@@ -181,22 +181,22 @@ def cli_main():
         val_loader = DataLoader(val_dataset, batch_size=Ytest1.shape[0], shuffle=False, pin_memory=True, num_workers=23, persistent_workers=True)
         test_loader = DataLoader(test_dataset, batch_size=Xtest1.shape[0], shuffle=False, pin_memory=True, num_workers=23, persistent_workers=True)
 
-        GradientBoosting = GradientBoostingRegressor()
+        GradientBoosting = GradientBoostingRegressor(n_estimators=500, random_state=42)
         GradientBoosting.fit(Xtrain1_minmax, Ytrain1)
         with open(os.path.join('Models', str(args.dataset), str(args.task), 'GBR' + str(i) + '.pkl'), 'wb') as file:
             pickle.dump(GradientBoosting, file)
 
-        Bagging = BaggingRegressor()
+        Bagging = BaggingRegressor(n_estimators=500, random_state=42)
         Bagging.fit(Xtrain1_minmax, Ytrain1)
         with open(os.path.join('Models', str(args.dataset), str(args.task), 'BR' + str(i) + '.pkl'), 'wb') as file:
             pickle.dump(Bagging, file)
 
-        RandomForest = RandomForestRegressor()
+        RandomForest = RandomForestRegressor(n_estimators=500, random_state=42)
         RandomForest.fit(Xtrain1_minmax, Ytrain1)
         with open(os.path.join('Models', str(args.dataset), str(args.task), 'RFR' + str(i) + '.pkl'), 'wb') as file:
             pickle.dump(RandomForest, file)
 
-        KNeighbors = KNeighborsRegressor()
+        KNeighbors = KNeighborsRegressor(n_estimators=500, random_state=42)
         KNeighbors.fit(Xtrain1_minmax, Ytrain1)
         with open(os.path.join('Models', str(args.dataset), str(args.task), 'KNR' + str(i) + '.pkl'), 'wb') as file:
             pickle.dump(KNeighbors, file)
@@ -210,8 +210,8 @@ def cli_main():
         early_stop_callback = EarlyStopping(monitor="val_MAE", min_delta=0.000, patience=10, verbose=True, mode="min")
         # ------------
         # training
-        # ------------10000-500
-        trainer = pl.Trainer(max_epochs=200, check_val_every_n_epoch=10,
+        # ------------
+        trainer = pl.Trainer(max_epochs=500, check_val_every_n_epoch=10,
                              callbacks=[early_stop_callback], accelerator="gpu")
         trainer.fit(model, train_loader, val_loader)
         # trainer.save_checkpoint(os.path.join('Models', str(args.dataset), str(args.task), 'Ensemble' + str(i) + '.ckpt'))
